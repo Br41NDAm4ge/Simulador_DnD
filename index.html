@@ -11,10 +11,30 @@
     <!-- Janela de visualização (Viewport) -->
     <div id="viewport">
         <!-- O Grid/Mapa gigante -->
-        <div id="map-grid">
-            <!-- Aqui você pode adicionar elementos do grid futuramente -->
-        </div>
+        <div id="map-grid"></div>
     </div>
+
+    <!-- Menu Lateral Fixo -->
+    <aside id="sidebar">
+        <h2>Simulador D&D</h2>
+        <nav>
+            <ul>
+                <li>
+                    <button class="menu-btn" id="btn-estruturas">Estruturas</button>
+                    <!-- Sub-menu de cores (inicialmente oculto) -->
+                    <div id="structures-submenu" class="submenu hidden">
+                        <button class="color-btn" data-color="#3498db" style="background-color: #3498db;">Água</button>
+                        <button class="color-btn" data-color="#2ecc71" style="background-color: #2ecc71;">Grama</button>
+                        <button class="color-btn" data-color="#7f8c8d" style="background-color: #7f8c8d;">Pedra</button>
+                    </div>
+                </li>
+                <li><button class="menu-btn">Ferramentas</button></li>
+                <li><button class="menu-btn">Criaturas</button></li>
+                <li><button class="menu-btn">NPC</button></li>
+                <li><button class="menu-btn">Boss</button></li>
+            </ul>
+        </nav>
+    </aside>
 
     <script src="js/script.js"></script>
 </body>
