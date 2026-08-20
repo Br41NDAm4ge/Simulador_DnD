@@ -55,6 +55,19 @@ export function inicializarCamera() {
         }
     });
 
+    // --- PARAR SE O MOUSE SAIR DA TELA ---
+    window.addEventListener('mouseout', (e) => {
+        // Se o mouse sair para fora do documento inteiro
+        if (e.relatedTarget === null) {
+            movimentoX = 0;
+            movimentoY = 0;
+            if (animacaoPan) {
+                cancelAnimationFrame(animacaoPan);
+                animacaoPan = null;
+            }
+        }
+    });
+
     // --- MOVER A CÂMERA DE FATO ---
     function moverCamera() {
         posX += movimentoX;
