@@ -1,35 +1,43 @@
-// js/tileset.js
 export function inicializarPaleta(aoSelecionarTileCallback) {
     const paleta = document.getElementById('paleta-tiles');
-    const tilesGrid = document.getElementById('tiles-grid');
+    
+    // Cria a estrutura visual da paleta com a imagem inteira
+    paleta.innerHTML = `
+        <div id="tileset-container">
+            <img id="tileset-img" src="assets/images/Tileset_Preview_1.png" alt="Tileset">
+            <div id="tile-selecao-cursor"></div>
+        </div>
+    `;
 
-    // Exemplo de coordenadas de recortes do seu spritesheet (em pixels de background-position)
-    // Cada tile tem um X e Y proporcional na imagem
-    const tilesDisponiveis = [
-        { id: 'parede-1', x: 0, y: 0 },
-        { id: 'parede-2', x: -50, y: 0 },
-        { id: 'parede-3', x: -100, y: 0 },
-        { id: 'chao-1', x: 0, y: -50 },
-        { id: 'chao-2', x: -50, y: -50 },
-    ];
+    const img = document.getElementById('tileset-img');
+    const cursor = document.getElementById('tile-selecao-cursor');
 
-    tilesGrid.innerHTML = '';
+    // Tamanho em pixels de cada quadradinho individual dentro do seu spritesheet original
+    const tamanhoTileOriginal = 16; // Geralmente tiles de pixel art são 16x16 ou 32x32. Vamos testar 16.
 
-    tilesDisponiveis.forEach(tile => {
-        const div = document.createElement('div');
-        div.className = 'tile-opcao';
-        div.style.backgroundPosition = `${tile.x}px ${tile.y}px`;
+    img.addEventListener('click', (e) => {
+        const rect = img.getBoundingClientRect();
+        
+5        // Posição do clique dentro da imagem em pixels da tela
+        const xNaTela = e.clientX - rect.left;
+        const yNaTela = e.clientY - rect.top;
 
-        div.addEventListener('click', () => {
-            // Remove seleção anterior
-            document.querySelectorAll('.tile-opcao').forEach(el => el.classList.remove('selecionado'));
-            div.classList.add('selecionado');
+        // Calcula a escala caso a imagem esteja redimensionada na tela
+        const escalaX = img.naturalWidth / img.clientWidth;
+        const escalaY = img.naturalHeight / img.clientHeight;
 
-            // Avisa o grid qual tile desenhar
-            aoSelecionarTileCallback(tile);
-        });
+        const xReal = Math.floor((xNaTela * escalaX) / tamanhoTileOriginal);
+        const yReal = Math.floor((yNaTela * escalaY) / tamanhoTileOriginal);
 
-        tilesGrid.appendChild(div);
+        // Posiciona o quadrado vermelho de seleção em cima do tile clicado
+        cursor.style.display = 'block';
+        cursor.style.left = `${xReal * (tamanhoTileOriginal / escalaX)}px`;
+        cursor.style.top = `${yReal * (tamanhoTileOriginal / escalaY)}px`;
+        cursor.style.width = `${tamanhoTileOriginal / escalaX}px`;
+        cursor.style.height = `${tamanhoTileOriginal / escalaY}px`;
+
+        // Informa para o sistema qual tile foi escolhido (coordenadas da matriz)
+        aoSelecionarTileCallback({ x: xReal, y: yReal, tamanho: tamanhoTileOriginal });
     });
 }
 
