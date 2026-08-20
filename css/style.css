@@ -1,10 +1,17 @@
-body { 
-    margin: 0; 
-    overflow: hidden; 
-    background-color: #1a252f; /* Fundo mais escuro para o "vazio" fora do mapa */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* O espaço que vemos na tela */
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Remove as barras de rolagem nativas */
+    background-color: #1a1a1a;
+}
+
+/* Janela que limita o que o usuário vê na tela */
 #viewport {
     width: 100vw;
     height: 100vh;
@@ -12,203 +19,18 @@ body {
     overflow: hidden;
 }
 
-/* O mapa em si, agora livre para se mover */
-#grid-container {
-    display: grid;
+/* O Grid que se estende além da tela */
+#map-grid {
+    width: 3000px;  /* Largura total do mapa */
+    height: 3000px; /* Altura total do mapa */
     position: absolute;
     top: 0;
     left: 0;
-    transform-origin: 0 0; /* Garante que o zoom funcione no ponto certo */
-    will-change: transform; /* Deixa o movimento muito mais liso */
-}
-
-.square {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.square.marked {
-    background-color: #e74c3c;
-}
-/* --- MENU LATERAL --- */
-#ferramentas-menu {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    background-color: #2c3e50;
-    border-radius: 0 10px 10px 0;
-    display: flex;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-    z-index: 100; /* Mantém o menu por cima do mapa */
     
-    /* Configuração inicial: menu fechado mostrando só o ícone */
-    width: 50px;
-    overflow: hidden;
-    transition: width 0.3s ease;
-    transition-delay: 0s; /* Fecha na hora quando o mouse sai */
-}
-
-/* Quando o mouse fica em cima... */
-#ferramentas-menu:hover {
-    width: 180px;
-    transition-delay: 1s; /* Espera 1 segundo exato para abrir! */
-}
-
-.menu-icon {
-    min-width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: white;
-    cursor: default;
-}
-
-.menu-opcoes {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 10px 0;
-    width: 130px;
-    
-    /* Esconde o texto para não bugar visualmente enquanto fechado */
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    transition-delay: 0s;
-}
-
-#ferramentas-menu:hover .menu-opcoes {
-    opacity: 1;
-    transition-delay: 1s; /* O texto também só aparece após 1s */
-}
-
-.ferramenta-btn {
-    background: none;
-    border: none;
-    color: white;
-    padding: 10px;
-    text-align: left;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
-    margin: 2px 5px;
-    transition: background 0.2s;
-}
-
-.ferramenta-btn:hover {
-    background-color: #34495e;
-}
-/* Configuração base para qualquer quadrado pintado com tile */
-.square.tile-base {
-    background-image: url('../assets/images/tileset.png');
-    background-repeat: no-repeat;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-/* Exemplo: Pegando a parede de pedra escura (linha de baixo, canto superior esquerdo do bloco de pedra) */
-/* Estilo para quando a ferramenta de Estrutura estiver ativa */
-.square.estrutura {
-    background-image: url('../assets/images/parede.png');
-    background-size: cover; /* Faz a imagem preencher perfeitamente os 50x50 pixels */
-    background-position: center;
-    background-repeat: no-repeat;
-    border: 1px solid rgba(0, 0, 0, 0.4);
-}
-/* --- PALETA DE TILES --- */
-#paleta-tiles {
-    position: fixed;
-    top: 50%;
-    left: 70px; /* Fica logo ao lado do menu lateral */
-    transform: translateY(-50%);
-    background-color: #2c3e50;
-    border: 2px solid #34495e;
-    border-radius: 8px;
-    padding: 15px;
-    width: 220px;
-    max-height: 400px;
-    overflow-y: auto;
-    z-index: 99;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    color: white;
-}
-
-#paleta-tiles.escondido {
-    display: none;
-}
-
-#paleta-tiles h3 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    text-align: center;
-    font-family: sans-serif;
-}
-
-#tiles-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-}
-
-/* Cada mini tile na paleta de seleção */
-.tile-opcao {
-    width: 50px;
-    height: 50px;
-    background-image: url('../assets/images/Tileset_Preview_1.png');
-    background-size: 400px auto; /* Ajuste conforme o tamanho total do seu spritesheet */
-    border: 2px solid transparent;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.tile-opcao:hover {
-    border-color: #3498db;
-}
-
-.tile-opcao.selecionado {
-    border-color: #e74c3c;
-}
-/* --- PALETA DE TILESET COMPLETO --- */
-#paleta-tiles {
-    position: fixed;
-    top: 50%;
-    left: 70px; 
-    transform: translateY(-50%);
-    background-color: #2c3e50;
-    border: 2px solid #34495e;
-    border-radius: 8px;
-    padding: 10px;
-    z-index: 99;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-#paleta-tiles.escondido {
-    display: none;
-}
-
-/* O contêiner onde a imagem inteira vai aparecer */
-#tileset-container {
-    position: relative;
-    cursor: crosshair;
-    line-height: 0; /* Remove espaços indesejados abaixo da imagem */
-}
-
-/* A imagem inteira do tileset */
-#tileset-img {
-    max-width: 300px; /* Ajuste o tamanho máximo que a paleta terá na tela */
-    height: auto;
-    display: block;
-    image-rendering: pixelated; /* Mantém os pixels nítidos e bonitos */
-}
-
-/* Um quadrado indicador que mostra onde você clicou no tileset */
-#tile-selecao-cursor {
-    position: absolute;
-    width: 32px;  /* Ajuste para o tamanho real do tile em pixels se necessário */
-    height: 32px;
-    border: 2px solid #e74c3c;
-    pointer-events: none; /* Deixa o mouse passar direto por cima */
-    display: none;
+    /* Cria o efeito visual de grid/quadrícula de D&D */
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px; /* Tamanho de cada quadrado do grid */
+    background-color: #2c2c2c;
 }

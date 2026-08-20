@@ -2,40 +2,20 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>VTT D&D</title>
-    <!-- Link para o CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador D&D - Mapa</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Menu de Ferramentas -->
-    <div id="ferramentas-menu">
-        <div class="menu-icon">🛠️</div>
-        <div class="menu-opcoes">
-            <button class="ferramenta-btn" data-ferramenta="estrutura">Estrutura</button>
-            <button class="ferramenta-btn" data-ferramenta="token">Token</button>
-            <button class="ferramenta-btn" data-ferramenta="monstro">Monstro</button>
-            <button class="ferramenta-btn" data-ferramenta="npc">NPC</button>
-            <button class="ferramenta-btn" data-ferramenta="boss">Boss</button>
-        </div>
-        <div id="paleta-tiles" class="escondido">
-    <h3>Escolha o Tile</h3>
-    <div id="tiles-grid"></div>
-</div>
-    </div>
 
-    <!-- NOVO: Painel de Tiles (Paleta que abre para escolher a estrutura) -->
-    <div id="paleta-tiles" class="escondido">
-        <h3>Escolha o Tile</h3>
-        <div id="tiles-grid">
-            <!-- Os tiles individuais aparecerão aqui via JavaScript -->
-        </div>
-    </div>
-
-    <!-- A lente da câmera -->
+    <!-- Janela de visualização (Viewport) -->
     <div id="viewport">
-        <div id="grid-container"></div>
+        <!-- O Grid/Mapa gigante -->
+        <div id="map-grid">
+            <!-- Aqui você pode adicionar elementos do grid futuramente -->
+        </div>
     </div>
-    
-    <script type="module" src="js/main.js"></script>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
