@@ -4,8 +4,8 @@ const tamanhoQuadrado = 50;
 let estadoGrid = carregarGrid();
 
 export function inicializarGrid(container) {
-    const colunas = Math.floor(window.innerWidth / tamanhoQuadrado);
-    const linhas = Math.floor(window.innerHeight / tamanhoQuadrado);
+    const colunas = 100;
+    const linhas = 100;
 
     container.style.gridTemplateColumns = `repeat(${colunas}, ${tamanhoQuadrado}px)`;
     container.style.gridTemplateRows = `repeat(${linhas}, ${tamanhoQuadrado}px)`;

@@ -1,13 +1,25 @@
 body { 
     margin: 0; 
     overflow: hidden; 
-    background-color: #2c3e50; 
+    background-color: #1a252f; /* Fundo mais escuro para o "vazio" fora do mapa */
 }
 
-#grid-container {
-    display: grid;
+/* O espaço que vemos na tela */
+#viewport {
     width: 100vw;
     height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* O mapa em si, agora livre para se mover */
+#grid-container {
+    display: grid;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0; /* Garante que o zoom funcione no ponto certo */
+    will-change: transform; /* Deixa o movimento muito mais liso */
 }
 
 .square {
