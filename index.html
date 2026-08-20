@@ -19,16 +19,29 @@
         <h2>Simulador D&D</h2>
         <nav>
             <ul>
+                <!-- Menu Estruturas -->
                 <li>
                     <button class="menu-btn" id="btn-estruturas">Estruturas</button>
-                    <!-- Sub-menu de cores (inicialmente oculto) -->
                     <div id="structures-submenu" class="submenu hidden">
-                        <button class="color-btn" data-color="#3498db" style="background-color: #3498db;">Água</button>
-                        <button class="color-btn" data-color="#2ecc71" style="background-color: #2ecc71;">Grama</button>
-                        <button class="color-btn" data-color="#7f8c8d" style="background-color: #7f8c8d;">Pedra</button>
-                    </div>
+    <button class="color-btn" data-color="#3498db" style="background-color: #3498db;">Água</button>
+    <button class="color-btn" data-color="#4b7c3e" style="background-color: #4b7c3e;">Grama</button>
+    <button class="color-btn" data-color="#8d6e63" style="background-color: #8d6e63;">Terra</button> <!-- Novo -->
+    <button class="color-btn" data-color="#7f8c8d" style="background-color: #7f8c8d;">Pedra</button>
+    <button class="color-btn" data-color="default" style="background-color: #555555; border: 1px dashed #fff;">Apagar / Padrão</button>
+</div>
                 </li>
-                <li><button class="menu-btn">Ferramentas</button></li>
+
+                <!-- Menu Ferramentas -->
+                <li>
+                    <button class="menu-btn" id="btn-ferramentas">Ferramentas</button>
+                    <div id="tools-submenu" class="submenu hidden">
+    <button class="tool-btn active-tool" data-tool="paint">Pincel Livre</button>
+    <button class="tool-btn" data-tool="rectangle">Retângulo (Área)</button>
+    <button class="tool-btn" data-tool="move">Mover Área</button>
+    <button class="tool-btn" data-tool="generate">Gerar Terreno</button> <!-- Novo -->
+</div>
+                </li>
+
                 <li><button class="menu-btn">Criaturas</button></li>
                 <li><button class="menu-btn">NPC</button></li>
                 <li><button class="menu-btn">Boss</button></li>

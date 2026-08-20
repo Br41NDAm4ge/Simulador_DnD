@@ -10,7 +10,7 @@ body, html {
     overflow: hidden;
     background-color: #1a1a1a;
     font-family: Arial, sans-serif;
-    user-select: none; /* Evita selecionar textos/elementos ao arrastar o mouse */
+    user-select: none;
 }
 
 #viewport {
@@ -45,17 +45,47 @@ body, html {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Efeito de animação suave para a água */
+/* Animação da água */
 @keyframes waterAnimation {
     0% { background-color: #3498db; }
     50% { background-color: #2980b9; }
     100% { background-color: #3498db; }
 }
+.stone-tile {
+    background-color: #6c7a89 !important; /* Tom cinza base */
+    background-image: 
+        /* Linhas horizontais e verticais simulando as fendas entre as pedras */
+        linear-gradient(to right, rgba(0, 0, 0, 0.3) 2px, transparent 2px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 2px, transparent 2px),
+        /* Textura sutil de ruído/grão nas pedras */
+        radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 25px 25px, 25px 25px, 10px 10px; /* Divide o quadrado em blocos menores de pedra */
+    background-position: 0 0, 0 0, 5px 5px;
+    border-color: #485460 !important;
+}
+
+/* Bordas externas escuras para definir o formato do terreno de pedra */
+.stone-border-t { border-top: 3px solid #2f3640 !important; }
+.stone-border-b { border-bottom: 3px solid #2f3640 !important; }
+.stone-border-l { border-left: 3px solid #2f3640 !important; }
+.stone-border-r { border-right: 3px solid #2f3640 !important; }
 
 .water-tile {
     animation: waterAnimation 3s infinite ease-in-out;
     border-color: rgba(52, 152, 219, 0.4);
 }
+
+/* Estilo base da Grama (Verde mais natural) */
+.grass-tile {
+    background-color: #4b7c3e;
+    border-color: #3b6330;
+}
+
+/* Bordas externas mais escuras dinâmicas para a grama */
+.grass-border-t { border-top: 3px solid #274220; }
+.grass-border-b { border-bottom: 3px solid #274220; }
+.grass-border-l { border-left: 3px solid #274220; }
+.grass-border-r { border-right: 3px solid #274220; }
 
 /* Estilização do Menu Lateral */
 #sidebar {
@@ -135,3 +165,61 @@ body, html {
 .color-btn:hover {
     opacity: 0.8;
 }
+/* Estilo base da Grama com textura pixelada de tufos usando gradientes */
+.grass-tile {
+    background-color: #4b7c3e !important;
+    background-image: 
+        /* Pequenos tufos de grama mais clara espalhados */
+        radial-gradient(circle, #5a934a 2px, transparent 2px),
+        radial-gradient(circle, #5a934a 1.5px, transparent 1.5px);
+    background-size: 16px 16px, 24px 24px; /* Repete a textura em tamanhos diferentes */
+    background-position: 4px 6px, 12px 18px; /* Posiciona os tufos para parecerem aleatórios */
+    background-repeat: repeat;
+}
+
+/* Bordas externas escuras para definir o formato do terreno */
+.grass-border-t { border-top: 3px solid #274220 !important; }
+.grass-border-b { border-bottom: 3px solid #274220 !important; }
+.grass-border-l { border-left: 3px solid #274220 !important; }
+.grass-border-r { border-right: 3px solid #274220 !important; }
+.tool-btn {
+    padding: 8px;
+    background-color: #333;
+    color: #ccc;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.tool-btn:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.tool-btn.active-tool {
+    background-color: #d4af37;
+    color: #111;
+    border-color: #fff;
+    font-weight: bold;
+}
+
+/* Efeito visual temporário para seleção de área (Retângulo / Mover) */
+.grid-cell.selection-preview {
+    outline: 2px dashed #f1c40f !important;
+    background-color: rgba(241, 196, 15, 0.2) !important;
+}
+/* Estilo base da Terra */
+.earth-tile {
+    background-color: #8d6e63 !important;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.15) 1px, transparent 1px);
+    background-size: 8px 8px;
+}
+
+/* Borda da terra apenas quando encosta na água */
+.earth-border-t { border-top: 3px solid #4e342e !important; }
+.earth-border-b { border-bottom: 3px solid #4e342e !important; }
+.earth-border-l { border-left: 3px solid #4e342e !important; }
+.earth-border-r { border-right: 3px solid #4e342e !important; }
