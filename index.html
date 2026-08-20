@@ -11,21 +11,27 @@
     <div id="ferramentas-menu">
         <div class="menu-icon">🛠️</div>
         <div class="menu-opcoes">
-            <button class="ferramenta-btn">Token</button>
-            <button class="ferramenta-btn">Monstro</button>
-            <button class="ferramenta-btn">Estrutura</button>
-            <button class="ferramenta-btn">NPC</button>
-            <button class="ferramenta-btn">Boss</button>
+            <button class="ferramenta-btn" data-ferramenta="estrutura">Estrutura</button>
+            <button class="ferramenta-btn" data-ferramenta="token">Token</button>
+            <button class="ferramenta-btn" data-ferramenta="monstro">Monstro</button>
+            <button class="ferramenta-btn" data-ferramenta="npc">NPC</button>
+            <button class="ferramenta-btn" data-ferramenta="boss">Boss</button>
+        </div>
+    </div>
+
+    <!-- NOVO: Painel de Tiles (Paleta que abre para escolher a estrutura) -->
+    <div id="paleta-tiles" class="escondido">
+        <h3>Escolha o Tile</h3>
+        <div id="tiles-grid">
+            <!-- Os tiles individuais aparecerão aqui via JavaScript -->
         </div>
     </div>
 
     <!-- A lente da câmera -->
     <div id="viewport">
-        <!-- O mapa gigante que vai se mover lá dentro -->
         <div id="grid-container"></div>
     </div>
     
-    <!-- Script principal como módulo para permitir imports -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

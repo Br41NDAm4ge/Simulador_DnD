@@ -8,22 +8,23 @@ export function inicializarCamera() {
     let posY = 0;
 
     // Configurações de movimento de borda
-    const margemBorda = 50; // Quão perto da borda o mouse precisa chegar (em pixels)
-    const velocidadePan = 8; // Velocidade que o mapa anda
+    const margemBorda = 50; 
+    const velocidadePan = 8; 
     let movimentoX = 0;
     let movimentoY = 0;
     let animacaoPan = null;
 
     // --- FUNÇÃO DE ZOOM (Roda do Mouse) ---
     viewport.addEventListener('wheel', (e) => {
-        // Previne rolar a página inteira
+        // IGNORA O ZOOM SE O MOUSE ESTIVER NO MENU
+        if (e.target.closest('#ferramentas-menu')) return;
+
         e.preventDefault(); 
 
         const direcao = e.deltaY > 0 ? -1 : 1;
         const fatorZoom = 0.1;
-        const novaEscala = Math.min(Math.max(0.3, escala + (direcao * fatorZoom)), 3); // Limites de zoom: 30% a 300%
+        const novaEscala = Math.min(Math.max(0.3, escala + (direcao * fatorZoom)), 3); 
 
-        // Matemática avançada de VTT: faz o zoom ir na direção do ponteiro do mouse
         const mouseX = e.clientX;
         const mouseY = e.clientY;
         
@@ -36,15 +37,26 @@ export function inicializarCamera() {
 
     // --- DETECTAR MOUSE NA BORDA ---
     window.addEventListener('mousemove', (e) => {
+        // NOVA REGRA: Se o mouse estiver em cima do menu, cancela o movimento e ignora a borda
+        if (e.target.closest('#ferramentas-menu')) {
+            movimentoX = 0;
+            movimentoY = 0;
+            if (animacaoPan) {
+                cancelAnimationFrame(animacaoPan);
+                animacaoPan = null;
+            }
+            return; // Sai da função aqui, sem olhar as bordas
+        }
+
         movimentoX = 0;
         movimentoY = 0;
 
         // Verifica os 4 cantos da tela
-        if (e.clientX < margemBorda) movimentoX = velocidadePan; // Mouse na esquerda
-        else if (e.clientX > window.innerWidth - margemBorda) movimentoX = -velocidadePan; // Mouse na direita
+        if (e.clientX < margemBorda) movimentoX = velocidadePan; 
+        else if (e.clientX > window.innerWidth - margemBorda) movimentoX = -velocidadePan; 
         
-        if (e.clientY < margemBorda) movimentoY = velocidadePan; // Mouse no topo
-        else if (e.clientY > window.innerHeight - margemBorda) movimentoY = -velocidadePan; // Mouse no fundo
+        if (e.clientY < margemBorda) movimentoY = velocidadePan; 
+        else if (e.clientY > window.innerHeight - margemBorda) movimentoY = -velocidadePan; 
 
         // Se o mouse estiver na borda, começa a mover. Se sair, para.
         if ((movimentoX !== 0 || movimentoY !== 0) && !animacaoPan) {
@@ -57,7 +69,6 @@ export function inicializarCamera() {
 
     // --- PARAR SE O MOUSE SAIR DA TELA ---
     window.addEventListener('mouseout', (e) => {
-        // Se o mouse sair para fora do documento inteiro
         if (e.relatedTarget === null) {
             movimentoX = 0;
             movimentoY = 0;
@@ -74,7 +85,6 @@ export function inicializarCamera() {
         posY += movimentoY;
         atualizarCamera();
 
-        // Continua rodando em loop enquanto o mouse estiver na borda
         if (movimentoX !== 0 || movimentoY !== 0) {
             animacaoPan = requestAnimationFrame(moverCamera);
         }

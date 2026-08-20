@@ -101,3 +101,72 @@ body {
 .ferramenta-btn:hover {
     background-color: #34495e;
 }
+/* Configuração base para qualquer quadrado pintado com tile */
+.square.tile-base {
+    background-image: url('../assets/images/tileset.png');
+    background-repeat: no-repeat;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Exemplo: Pegando a parede de pedra escura (linha de baixo, canto superior esquerdo do bloco de pedra) */
+/* Estilo para quando a ferramenta de Estrutura estiver ativa */
+.square.estrutura {
+    background-image: url('../assets/images/parede.png');
+    background-size: cover; /* Faz a imagem preencher perfeitamente os 50x50 pixels */
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+}
+/* --- PALETA DE TILES --- */
+#paleta-tiles {
+    position: fixed;
+    top: 50%;
+    left: 70px; /* Fica logo ao lado do menu lateral */
+    transform: translateY(-50%);
+    background-color: #2c3e50;
+    border: 2px solid #34495e;
+    border-radius: 8px;
+    padding: 15px;
+    width: 220px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 99;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    color: white;
+}
+
+#paleta-tiles.escondido {
+    display: none;
+}
+
+#paleta-tiles h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    text-align: center;
+    font-family: sans-serif;
+}
+
+#tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+/* Cada mini tile na paleta de seleção */
+.tile-opcao {
+    width: 50px;
+    height: 50px;
+    background-image: url('../assets/images/Tileset_Preview_1.png');
+    background-size: 400px auto; /* Ajuste conforme o tamanho total do seu spritesheet */
+    border: 2px solid transparent;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.tile-opcao:hover {
+    border-color: #3498db;
+}
+
+.tile-opcao.selecionado {
+    border-color: #e74c3c;
+}
