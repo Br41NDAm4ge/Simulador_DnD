@@ -1,55 +1,39 @@
-import { setSelectedColor, setCurrentTool, generateRandomTerrain } from './map_logic.js';
+document.addEventListener("DOMContentLoaded", () => {
+    const tilesList = document.getElementById('tiles-list');
+    
+    // Pré-carrega as imagens e cria os botões na sidebar
+    tileFiles.forEach(filename => {
+        const imgSrc = `assets/tiles/${filename}`;
+        
+        // Cache da imagem para o canvas desenhar rápido
+        const img = new Image();
+        img.src = imgSrc;
+        appState.loadedImages[filename] = img;
 
-export function setupUI() {
-    console.log("setupUI foi chamada com sucesso!");
+        // Cria o elemento visual na sidebar
+        const div = document.createElement('div');
+        div.className = 'tile-item';
+        div.style.backgroundImage = `url('${imgSrc}')`;
+        div.title = filename;
 
-    const btnEstruturas = document.getElementById('btn-estruturas');
-    const structuresSubmenu = document.getElementById('structures-submenu');
-    const btnFerramentas = document.getElementById('btn-ferramentas');
-    const toolsSubmenu = document.getElementById('tools-submenu');
-
-    if (btnEstruturas && structuresSubmenu) {
-        btnEstruturas.addEventListener('click', (e) => {
-            e.stopPropagation();
-            structuresSubmenu.classList.toggle('hidden');
-            if (toolsSubmenu) toolsSubmenu.classList.add('hidden');
-            console.log("Clique em Estruturas funcionou!");
+        div.addEventListener('click', () => {
+            // Remove seleção anterior
+            document.querySelectorAll('.tile-item').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+            appState.selectedTile = filename;
         });
-    } else {
-        console.warn("Elemento de estruturas não encontrado no DOM!");
-    }
 
-    if (btnFerramentas && toolsSubmenu) {
-        btnFerramentas.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toolsSubmenu.classList.toggle('hidden');
-            if (structuresSubmenu) structuresSubmenu.classList.add('hidden');
-            console.log("Clique em Ferramentas funcionou!");
-        });
-    } else {
-        console.warn("Elemento de ferramentas não encontrado no DOM!");
-    }
-
-    const colorButtons = document.querySelectorAll('.color-btn');
-    colorButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            setSelectedColor(button.getAttribute('data-color'));
-            colorButtons.forEach(b => b.style.outline = 'none');
-            button.style.outline = '3px solid #fff';
-        });
+        tilesList.appendChild(div);
     });
 
-    const toolButtons = document.querySelectorAll('.tool-btn');
-    toolButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const tool = button.getAttribute('data-tool');
-            if (tool === 'generate') {
-                generateRandomTerrain();
-                return;
-            }
-            setCurrentTool(tool);
-            toolButtons.forEach(b => b.classList.remove('active-tool'));
-            button.classList.add('active-tool');
-        });
-    });
-}
+    // Lógica das Abas
+    document.getElementById('btn-tiles').onclick = (e) => switchTab(e, 'tiles-panel');
+    document.getElementById('btn-monsters').onclick = (e) => switchTab(e, 'monsters-panel');
+
+    function switchTab(event, panelId) {
+        document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.getElementById(panelId).style.display = 'block';
+        event.target.classList.add('active');
+    }
+});

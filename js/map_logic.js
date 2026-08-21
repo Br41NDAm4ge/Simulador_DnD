@@ -1,261 +1,124 @@
-export const gridSize = 60;
-export const cells = [];
-export let selectedColor = '#4b7c3e';
-export let currentTool = 'paint';
-let isMouseDown = false;
-let startCellCoord = null;
-let selectedAreaCells = [];
-let isMovingArea = false;
-let moveBuffer = null;
-let moveSourceBounds = null;
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
 
-export function setSelectedColor(color) { selectedColor = color; }
-export function setCurrentTool(tool) { 
-    currentTool = tool; 
-    isMovingArea = false;
-    moveBuffer = null;
-    startCellCoord = null;
-    clearSelectionPreview();
+const GRID_COLS = 200;
+const GRID_ROWS = 200;
+const TILE_SIZE = 32;
+
+// Matriz do mapa (200x200 vazia)
+let mapGrid = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLS).fill(null));
+
+// Câmera
+let camera = { x: 0, y: 0, zoom: 1 };
+let mouse = { x: 0, y: 0, screenX: 0, screenY: 0 };
+
+function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
 }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-export function updateTransform(x, y, scale) {
-    const mapGrid = document.getElementById('map-grid');
-    mapGrid.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-}
+// --- CONTROLES DE MOUSE ---
 
-export function initGrid() {
-    const mapGrid = document.getElementById('map-grid');
-    const sidebar = document.getElementById('sidebar');
-    mapGrid.innerHTML = '';
-
-    for (let row = 0; row < gridSize; row++) {
-        cells[row] = [];
-        for (let col = 0; col < gridSize; col++) {
-            const cell = document.createElement('div');
-            cell.classList.add('grid-cell');
-            cell.dataset.row = row;
-            cell.dataset.col = col;
-
-            cell.addEventListener('mousedown', (e) => {
-                if (e.button !== 0 || e.clientX <= sidebar.offsetWidth) return;
-                e.stopPropagation();
-                isMouseDown = true;
-                const r = parseInt(cell.dataset.row);
-                const c = parseInt(cell.dataset.col);
-
-                if (currentTool === 'paint') {
-                    paintCell(cell);
-                } else if (currentTool === 'rectangle' || (currentTool === 'move' && !isMovingArea)) {
-                    startCellCoord = { row: r, col: c };
-                }
-            });
-
-            cell.addEventListener('mouseenter', () => {
-                if (!isMouseDown) return;
-                const r = parseInt(cell.dataset.row);
-                const c = parseInt(cell.dataset.col);
-
-                if (currentTool === 'paint') {
-                    paintCell(cell);
-                } else if ((currentTool === 'rectangle' || currentTool === 'move') && startCellCoord) {
-                    highlightArea(startCellCoord.row, startCellCoord.col, r, c);
-                }
-            });
-
-            mapGrid.appendChild(cell);
-            cells[row][col] = cell;
-        }
-    }
-
-    window.addEventListener('mouseup', (e) => {
-        if (!isMouseDown) return;
-        isMouseDown = false;
-
-        const target = e.target.closest('.grid-cell');
-        if (!target) return;
-
-        const endRow = parseInt(target.dataset.row);
-        const endCol = parseInt(target.dataset.col);
-
-        if (currentTool === 'rectangle' && startCellCoord) {
-            applyRectangle(startCellCoord.row, startCellCoord.col, endRow, endCol);
-            startCellCoord = null;
-            clearSelectionPreview();
-        } else if (currentTool === 'move') {
-            if (!isMovingArea && startCellCoord) {
-                moveSourceBounds = getBounds(startCellCoord.row, startCellCoord.col, endRow, endCol);
-                moveBuffer = extractAreaData(moveSourceBounds);
-                clearArea(moveSourceBounds);
-                isMovingArea = true;
-                startCellCoord = null;
-                clearSelectionPreview();
-                updateBorders();
-            } else if (isMovingArea && moveBuffer) {
-                pasteAreaData(endRow, endCol, moveBuffer);
-                isMovingArea = false;
-                moveBuffer = null;
-                moveSourceBounds = null;
-                updateBorders();
-            }
-        }
-    });
-}
-
-export function generateRandomTerrain() {
-    let inputSize = prompt("Digite o tamanho do terreno (ex: 10 a 25):", "15");
-    let radius = parseInt(inputSize);
-    if (isNaN(radius) || radius < 5) radius = 10;
-    if (radius > 25) radius = 25;
-
-    let centerR = Math.floor(gridSize / 2);
-    let centerC = Math.floor(gridSize / 2);
-
-    for (let r = 0; r < gridSize; r++) {
-        for (let c = 0; c < gridSize; c++) {
-            cells[r][c].className = 'grid-cell';
-            cells[r][c].style.backgroundColor = '';
-            cells[r][c].style.backgroundImage = '';
-            cells[r][c].style.border = '';
-        }
-    }
-
-    for (let r = centerR - radius - 4; r <= centerR + radius + 4; r++) {
-        for (let c = centerC - radius - 4; c <= centerC + radius + 4; c++) {
-            if (r < 0 || r >= gridSize || c < 0 || c >= gridSize) continue;
-            let dist = Math.sqrt(Math.pow(r - centerR, 2) + Math.pow(c - centerC, 2));
-            
-            if (dist <= radius + 4) {
-                if (dist > radius) {
-                    cells[r][c].className = 'grid-cell water-tile';
-                } else if (dist > radius - 3) {
-                    cells[r][c].className = 'grid-cell earth-tile';
-                } else {
-                    cells[r][c].className = 'grid-cell grass-tile';
-                }
-            }
-        }
-    }
-
-    updateBorders();
-}
-
-function getBounds(r1, c1, r2, c2) {
-    return { minR: Math.min(r1, r2), maxR: Math.max(r1, r2), minC: Math.min(c1, c2), maxC: Math.max(c1, c2) };
-}
-
-function highlightArea(r1, c1, r2, c2) {
-    clearSelectionPreview();
-    const b = getBounds(r1, c1, r2, c2);
-    for (let r = b.minR; r <= b.maxR; r++) {
-        for (let c = b.minC; c <= b.maxC; c++) {
-            cells[r][c].classList.add('selection-preview');
-            selectedAreaCells.push(cells[r][c]);
-        }
-    }
-}
-
-function clearSelectionPreview() {
-    selectedAreaCells.forEach(cell => cell.classList.remove('selection-preview'));
-    selectedAreaCells = [];
-}
-
-function applyRectangle(r1, c1, r2, c2) {
-    const b = getBounds(r1, c1, r2, c2);
-    for (let r = b.minR; r <= b.maxR; r++) {
-        for (let c = b.minC; c <= b.maxC; c++) {
-            paintCellWithoutBorderUpdate(cells[r][c]);
-        }
-    }
-    updateBorders();
-}
-
-function extractAreaData(b) {
-    const data = [];
-    for (let r = b.minR; r <= b.maxR; r++) {
-        for (let c = b.minC; c <= b.maxC; c++) {
-            const cell = cells[r][c];
-            data.push({ 
-                relRow: r - b.minR, 
-                relCol: c - b.minC, 
-                className: cell.className.replace(' selection-preview', ''), 
-                bgColor: cell.style.backgroundColor,
-                bgImage: cell.style.backgroundImage
-            });
-        }
-    }
-    return data;
-}
-
-function clearArea(b) {
-    for (let r = b.minR; r <= b.maxR; r++) {
-        for (let c = b.minC; c <= b.maxC; c++) {
-            cells[r][c].className = 'grid-cell';
-            cells[r][c].style.backgroundColor = '';
-            cells[r][c].style.backgroundImage = '';
-        }
-    }
-}
-
-function pasteAreaData(targetR, targetC, bufferData) {
-    bufferData.forEach(item => {
-        const destR = targetR + item.relRow;
-        const destC = targetC + item.relCol;
-        if (destR < gridSize && destC < gridSize) {
-            cells[destR][destC].className = item.className;
-            cells[destR][destC].style.backgroundColor = item.bgColor;
-            cells[destR][destC].style.backgroundImage = item.bgImage;
-        }
-    });
-}
-
-function paintCellWithoutBorderUpdate(cell) {
-    cell.style.backgroundColor = '';
-    cell.style.backgroundImage = '';
+// Pega a posição do mouse
+canvas.addEventListener('mousemove', (e) => {
+    mouse.screenX = e.clientX - canvas.getBoundingClientRect().left;
+    mouse.screenY = e.clientY - canvas.getBoundingClientRect().top;
     
-    if (selectedColor === 'default') {
-        cell.className = 'grid-cell';
-    } else if (selectedColor === '#3498db') {
-        cell.className = 'grid-cell water-tile';
-    } else if (selectedColor === '#4b7c3e') {
-        cell.className = 'grid-cell grass-tile';
-    } else if (selectedColor === '#8d6e63') {
-        cell.className = 'grid-cell earth-tile';
-    } else if (selectedColor === '#7f8c8d') {
-        cell.className = 'grid-cell stone-tile';
-    } else {
-        cell.className = 'grid-cell'; 
-        cell.style.backgroundColor = selectedColor;
+    if (appState.isDrawing) paintTile();
+});
+
+canvas.addEventListener('mousedown', (e) => {
+    if (e.button === 0) { // Clique esquerdo
+        appState.isDrawing = true;
+        paintTile();
+    }
+});
+
+canvas.addEventListener('mouseup', () => appState.isDrawing = false);
+canvas.addEventListener('mouseleave', () => appState.isDrawing = false);
+
+// Zoom com o scroll do mouse
+canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const zoomAmount = 0.1;
+    const oldZoom = camera.zoom;
+    
+    if (e.deltaY < 0) camera.zoom += zoomAmount; // Zoom in
+    else camera.zoom -= zoomAmount; // Zoom out
+    
+    camera.zoom = Math.max(0.5, Math.min(camera.zoom, 3)); // Limites do zoom (50% a 300%)
+    
+    // Ajusta a câmera para o zoom focar no mouse
+    camera.x = mouse.screenX - (mouse.screenX - camera.x) * (camera.zoom / oldZoom);
+    camera.y = mouse.screenY - (mouse.screenY - camera.y) * (camera.zoom / oldZoom);
+});
+
+// Pinta o grid
+function paintTile() {
+    if (!appState.selectedTile) return;
+
+    // Converte a posição da tela para a posição na matriz do grid
+    const gridX = Math.floor((mouse.screenX - camera.x) / (TILE_SIZE * camera.zoom));
+    const gridY = Math.floor((mouse.screenY - camera.y) / (TILE_SIZE * camera.zoom));
+
+    // Verifica se está dentro dos limites de 200x200
+    if (gridX >= 0 && gridX < GRID_COLS && gridY >= 0 && gridY < GRID_ROWS) {
+        mapGrid[gridY][gridX] = appState.selectedTile;
     }
 }
 
-function paintCell(cell) {
-    paintCellWithoutBorderUpdate(cell);
-    updateBorders();
-}
+// --- RENDERIZAÇÃO E MOVIMENTO DE CÂMERA ---
+function gameLoop() {
+    // 1. Movimenta a câmera se o mouse estiver nas bordas
+    const edgeSize = 40; // Pixels da borda para ativar o movimento
+    const moveSpeed = 5;
 
-function updateBorders() {
-    for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
-            const cell = cells[row][col];
+    if (mouse.screenX < edgeSize) camera.x += moveSpeed;
+    if (mouse.screenX > canvas.width - edgeSize) camera.x -= moveSpeed;
+    if (mouse.screenY < edgeSize) camera.y += moveSpeed;
+    if (mouse.screenY > canvas.height - edgeSize) camera.y -= moveSpeed;
 
-            cell.classList.remove(
-                'stone-border-t', 'stone-border-b', 'stone-border-l', 'stone-border-r',
-                'earth-border-t', 'earth-border-b', 'earth-border-l', 'earth-border-r'
-            );
+    // 2. Limpa o canvas
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            if (cell.classList.contains('stone-tile')) {
-                if (row === 0 || !cells[row - 1][col].classList.contains('stone-tile')) cell.classList.add('stone-border-t');
-                if (row === gridSize - 1 || !cells[row + 1][col].classList.contains('stone-tile')) cell.classList.add('stone-border-b');
-                if (col === 0 || !cells[row][col - 1].classList.contains('stone-tile')) cell.classList.add('stone-border-l');
-                if (col === gridSize - 1 || !cells[row][col + 1].classList.contains('stone-tile')) cell.classList.add('stone-border-r');
-            }
+    // 3. Aplica o Zoom e Pan
+    ctx.save();
+    ctx.translate(camera.x, camera.y);
+    ctx.scale(camera.zoom, camera.zoom);
 
-            if (cell.classList.contains('earth-tile')) {
-                if (row > 0 && cells[row - 1][col].classList.contains('water-tile')) cell.classList.add('earth-border-t');
-                if (row < gridSize - 1 && cells[row + 1][col].classList.contains('water-tile')) cell.classList.add('earth-border-b');
-                if (col > 0 && cells[row][col - 1].classList.contains('water-tile')) cell.classList.add('earth-border-l');
-                if (col < gridSize - 1 && cells[row][col + 1].classList.contains('water-tile')) cell.classList.add('earth-border-r');
+    // 4. Desenha os Tiles pintados
+    for (let y = 0; y < GRID_ROWS; y++) {
+        for (let x = 0; x < GRID_COLS; x++) {
+            let tileName = mapGrid[y][x];
+            if (tileName && appState.loadedImages[tileName]) {
+                ctx.drawImage(appState.loadedImages[tileName], x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
+
+    // 5. Desenha as linhas do Grid (apenas na área visível para otimizar)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1 / camera.zoom; // Mantém a linha fina independente do zoom
+
+    ctx.beginPath();
+    for (let x = 0; x <= GRID_COLS; x++) {
+        ctx.moveTo(x * TILE_SIZE, 0);
+        ctx.lineTo(x * TILE_SIZE, GRID_ROWS * TILE_SIZE);
+    }
+    for (let y = 0; y <= GRID_ROWS; y++) {
+        ctx.moveTo(0, y * TILE_SIZE);
+        ctx.lineTo(GRID_COLS * TILE_SIZE, y * TILE_SIZE);
+    }
+    ctx.stroke();
+
+    ctx.restore();
+    
+    // Chama o loop novamente na próxima atualização de tela (60fps)
+    requestAnimationFrame(gameLoop);
 }
+
+// Inicia o loop
+requestAnimationFrame(gameLoop);
