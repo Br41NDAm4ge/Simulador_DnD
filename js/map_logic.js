@@ -5,8 +5,12 @@ const GRID_COLS = 200;
 const GRID_ROWS = 200;
 const TILE_SIZE = 32;
 
-// Matriz do mapa (200x200 vazia)
-let mapGrid = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLS).fill(null));
+// Três camadas: Base (chão), Overlay (poças/detalhes) e Monsters (entidades)
+let mapGrid = {
+    base: Array.from({ length: GRID_ROWS }, () => Array(GRID_COLS).fill(null)),
+    overlay: Array.from({ length: GRID_ROWS }, () => Array(GRID_COLS).fill(null)),
+    monsters: Array.from({ length: GRID_ROWS }, () => Array(GRID_COLS).fill(null))
+};
 
 // Câmera
 let camera = { x: 0, y: 0, zoom: 1 };
@@ -21,7 +25,6 @@ resizeCanvas();
 
 // --- CONTROLES DE MOUSE ---
 
-// Pega a posição do mouse em relação ao canvas
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
     mouse.screenX = e.clientX - rect.left;
@@ -46,43 +49,45 @@ canvas.addEventListener('wheel', (e) => {
     const zoomAmount = 0.1;
     const oldZoom = camera.zoom;
     
-    if (e.deltaY < 0) camera.zoom += zoomAmount; // Zoom in
-    else camera.zoom -= zoomAmount; // Zoom out
+    if (e.deltaY < 0) camera.zoom += zoomAmount;
+    else camera.zoom -= zoomAmount;
     
-    camera.zoom = Math.max(0.5, Math.min(camera.zoom, 3)); // Limites do zoom (50% a 300%)
+    camera.zoom = Math.max(0.5, Math.min(camera.zoom, 3));
     
-    // Ajusta a câmera para o zoom focar no mouse
     camera.x = mouse.screenX - (mouse.screenX - camera.x) * (camera.zoom / oldZoom);
     camera.y = mouse.screenY - (mouse.screenY - camera.y) * (camera.zoom / oldZoom);
 }, { passive: false });
 
-// Pinta o grid
+// Pinta dependendo da ferramenta ativa
 function paintTile() {
-    if (!appState.selectedTile) return;
-
-    // Converte a posição da tela para a posição na matriz do grid
     const gridX = Math.floor((mouse.screenX - camera.x) / (TILE_SIZE * camera.zoom));
     const gridY = Math.floor((mouse.screenY - camera.y) / (TILE_SIZE * camera.zoom));
 
-    // Verifica se está dentro dos limites de 200x200
     if (gridX >= 0 && gridX < GRID_COLS && gridY >= 0 && gridY < GRID_ROWS) {
-        mapGrid[gridY][gridX] = appState.selectedTile;
+        if (appState.activeToolType === 'tile' && appState.selectedTile) {
+            // Poças vão para a camada overlay para não apagar o chão debaixo
+            if (appState.selectedTile.includes('Water_Hole')) {
+                mapGrid.overlay[gridY][gridX] = appState.selectedTile;
+            } else {
+                mapGrid.base[gridY][gridX] = appState.selectedTile;
+            }
+        } else if (appState.activeToolType === 'monster' && appState.selectedMonsterIndex !== null) {
+            mapGrid.monsters[gridY][gridX] = appState.selectedMonsterIndex;
+        }
     }
 }
 
 // --- RENDERIZAÇÃO E MOVIMENTO DE CÂMERA ---
 function gameLoop() {
-    // 1. Verifica se o mouse realmente está dentro da área do canvas
     const isMouseInCanvas = 
         mouse.screenX >= 0 && 
         mouse.screenX <= canvas.width && 
         mouse.screenY >= 0 && 
         mouse.screenY <= canvas.height;
 
-    const edgeSize = 40; // Pixels da borda para ativar o movimento
+    const edgeSize = 40;
     const moveSpeed = 6;
 
-    // Só movimenta a câmera se o mouse estiver dentro do canvas e encostando nas bordas
     if (isMouseInCanvas) {
         if (mouse.screenX < edgeSize) camera.x += moveSpeed;
         if (mouse.screenX > canvas.width - edgeSize) camera.x -= moveSpeed;
@@ -90,28 +95,54 @@ function gameLoop() {
         if (mouse.screenY > canvas.height - edgeSize) camera.y -= moveSpeed;
     }
 
-    // 2. Limpa o canvas
     ctx.fillStyle = '#111';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 3. Aplica o Zoom e Pan
     ctx.save();
     ctx.translate(camera.x, camera.y);
     ctx.scale(camera.zoom, camera.zoom);
 
-    // 4. Desenha os Tiles pintados
+    // 1. Desenha a Camada Base (Chão/Neve/Gelo)
     for (let y = 0; y < GRID_ROWS; y++) {
         for (let x = 0; x < GRID_COLS; x++) {
-            let tileName = mapGrid[y][x];
+            let tileName = mapGrid.base[y][x];
             if (tileName && appState.loadedImages[tileName]) {
                 ctx.drawImage(appState.loadedImages[tileName], x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
     }
 
-    // 5. Desenha as linhas do Grid
+    // 2. Desenha a Camada Overlay (Poças de água)
+    for (let y = 0; y < GRID_ROWS; y++) {
+        for (let x = 0; x < GRID_COLS; x++) {
+            let tileName = mapGrid.overlay[y][x];
+            if (tileName && appState.loadedImages[tileName]) {
+                ctx.drawImage(appState.loadedImages[tileName], x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            }
+        }
+    }
+
+    // 3. Desenha a Camada de Monstros (Recortando direto da spritesheet)
+    for (let y = 0; y < GRID_ROWS; y++) {
+        for (let x = 0; x < GRID_COLS; x++) {
+            let monsterIndex = mapGrid.monsters[y][x];
+            if (monsterIndex !== null && monsterConfig.image.complete) {
+                const srcCol = monsterIndex % monsterConfig.columns;
+                const srcRow = Math.floor(monsterIndex / monsterConfig.columns);
+                
+                ctx.drawImage(
+                    monsterConfig.image,
+                    srcCol * monsterConfig.spriteWidth, srcRow * monsterConfig.spriteHeight,
+                    monsterConfig.spriteWidth, monsterConfig.spriteHeight,
+                    x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE
+                );
+            }
+        }
+    }
+
+    // 4. Desenha as linhas do Grid
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 1 / camera.zoom; // Mantém a linha fina independente do zoom
+    ctx.lineWidth = 1 / camera.zoom;
 
     ctx.beginPath();
     for (let x = 0; x <= GRID_COLS; x++) {
@@ -126,9 +157,7 @@ function gameLoop() {
 
     ctx.restore();
     
-    // Continua o loop de renderização (60fps)
     requestAnimationFrame(gameLoop);
 }
 
-// Inicia o loop
 requestAnimationFrame(gameLoop);
