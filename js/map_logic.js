@@ -21,10 +21,11 @@ resizeCanvas();
 
 // --- CONTROLES DE MOUSE ---
 
-// Pega a posição do mouse
+// Pega a posição do mouse em relação ao canvas
 canvas.addEventListener('mousemove', (e) => {
-    mouse.screenX = e.clientX - canvas.getBoundingClientRect().left;
-    mouse.screenY = e.clientY - canvas.getBoundingClientRect().top;
+    const rect = canvas.getBoundingClientRect();
+    mouse.screenX = e.clientX - rect.left;
+    mouse.screenY = e.clientY - rect.top;
     
     if (appState.isDrawing) paintTile();
 });
@@ -53,7 +54,7 @@ canvas.addEventListener('wheel', (e) => {
     // Ajusta a câmera para o zoom focar no mouse
     camera.x = mouse.screenX - (mouse.screenX - camera.x) * (camera.zoom / oldZoom);
     camera.y = mouse.screenY - (mouse.screenY - camera.y) * (camera.zoom / oldZoom);
-});
+}, { passive: false });
 
 // Pinta o grid
 function paintTile() {
@@ -71,14 +72,23 @@ function paintTile() {
 
 // --- RENDERIZAÇÃO E MOVIMENTO DE CÂMERA ---
 function gameLoop() {
-    // 1. Movimenta a câmera se o mouse estiver nas bordas
-    const edgeSize = 40; // Pixels da borda para ativar o movimento
-    const moveSpeed = 5;
+    // 1. Verifica se o mouse realmente está dentro da área do canvas
+    const isMouseInCanvas = 
+        mouse.screenX >= 0 && 
+        mouse.screenX <= canvas.width && 
+        mouse.screenY >= 0 && 
+        mouse.screenY <= canvas.height;
 
-    if (mouse.screenX < edgeSize) camera.x += moveSpeed;
-    if (mouse.screenX > canvas.width - edgeSize) camera.x -= moveSpeed;
-    if (mouse.screenY < edgeSize) camera.y += moveSpeed;
-    if (mouse.screenY > canvas.height - edgeSize) camera.y -= moveSpeed;
+    const edgeSize = 40; // Pixels da borda para ativar o movimento
+    const moveSpeed = 6;
+
+    // Só movimenta a câmera se o mouse estiver dentro do canvas e encostando nas bordas
+    if (isMouseInCanvas) {
+        if (mouse.screenX < edgeSize) camera.x += moveSpeed;
+        if (mouse.screenX > canvas.width - edgeSize) camera.x -= moveSpeed;
+        if (mouse.screenY < edgeSize) camera.y += moveSpeed;
+        if (mouse.screenY > canvas.height - edgeSize) camera.y -= moveSpeed;
+    }
 
     // 2. Limpa o canvas
     ctx.fillStyle = '#111';
@@ -99,7 +109,7 @@ function gameLoop() {
         }
     }
 
-    // 5. Desenha as linhas do Grid (apenas na área visível para otimizar)
+    // 5. Desenha as linhas do Grid
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1 / camera.zoom; // Mantém a linha fina independente do zoom
 
@@ -116,7 +126,7 @@ function gameLoop() {
 
     ctx.restore();
     
-    // Chama o loop novamente na próxima atualização de tela (60fps)
+    // Continua o loop de renderização (60fps)
     requestAnimationFrame(gameLoop);
 }
 
