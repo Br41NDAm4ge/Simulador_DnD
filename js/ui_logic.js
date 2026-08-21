@@ -25,18 +25,21 @@ document.addEventListener("DOMContentLoaded", () => {
         tilesList.appendChild(div);
     });
 
-    // 2. Cria dinamicamente os itens na aba de Monstros baseando-se na Spritesheet
-    const totalMonsters = 70; // Quantidade aproximada de animais na sua imagem
+    // 2. Cria dinamicamente os itens na aba de Monstros
+    const totalMonsters = 70; // Quantidade aproximada de animais
     for (let i = 0; i < totalMonsters; i++) {
         const div = document.createElement('div');
-        div.className = 'tile-item monster-item';
+        div.className = 'monster-item';
         
         const col = i % monsterConfig.columns;
         const row = Math.floor(i / monsterConfig.columns);
         
+        div.style.width = '32px';
+        div.style.height = '32px';
         div.style.backgroundImage = `url('${monsterConfig.sheetSrc}')`;
+        div.style.backgroundRepeat = 'no-repeat';
+        div.style.backgroundSize = '384px'; // columns (12) * 32px
         div.style.backgroundPosition = `-${col * 32}px -${row * 32}px`;
-        div.style.backgroundSize = '300px';
 
         div.addEventListener('click', () => {
             document.querySelectorAll('.tile-item, .monster-item').forEach(el => el.classList.remove('selected'));

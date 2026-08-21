@@ -11,9 +11,9 @@ const appState = {
 const monsterConfig = {
     sheetSrc: 'assets/enemies/animals.png',
     image: new Image(),
-    spriteWidth: 24,   // Largura padrão de cada célula na spritesheet
-    spriteHeight: 24,  // Altura padrão de cada célula na spritesheet
-    columns: 9         // Quantidade de sprites por linha horizontal na imagem
+    spriteWidth: 32,   // Tente alterar para 32 ou 24
+    spriteHeight: 32,  // Tente alterar para 32 ou 24
+    columns: 12        // Aumente ou diminua o número de colunas por linha
 };
 
 monsterConfig.image.src = monsterConfig.sheetSrc;

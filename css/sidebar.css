@@ -21,3 +21,23 @@
     background-size: cover; image-rendering: pixelated;
 }
 .tile-item.selected { border-color: #ffaa00; }
+/* Garante que a listagem de monstros se organize de forma limpa */
+#monsters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.monster-item {
+    background-color: #333;
+    border: 2px solid transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.monster-item.selected {
+    border-color: #ffaa00;
+    background-color: #444;
+}
