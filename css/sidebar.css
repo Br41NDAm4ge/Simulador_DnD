@@ -1,0 +1,61 @@
+#sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    background-color: #222;
+    border-right: 2px solid #333;
+    padding: 15px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+#sidebar h2 {
+    font-size: 1.2rem;
+    color: #f1c40f;
+    margin-bottom: 20px;
+    text-align: center;
+}
+#sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.menu-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #2c2c2c;
+    color: #fff;
+    border: 1px solid #444;
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+.menu-btn:hover {
+    background-color: #383838;
+}
+.submenu {
+    padding-left: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.color-btn, .tool-btn {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 3px;
+    color: #fff;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.9rem;
+    background-color: #333;
+}
+.color-btn:hover, .tool-btn:hover {
+    opacity: 0.85;
+}
+.active-tool {
+    background-color: #2980b9 !important;
+}

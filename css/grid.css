@@ -1,0 +1,72 @@
+/* Container Principal do Mapa */
+#map-grid {
+    display: grid;
+    grid-template-columns: repeat(60, 40px);
+    grid-template-rows: repeat(60, 40px);
+    width: 2400px;
+    height: 2400px;
+    position: absolute;
+    transform-origin: 0 0;
+    background-color: #1a1a1a;
+}
+
+/* Célula Base do Grid */
+.grid-cell {
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-size: cover !important;
+    transition: filter 0.2s;
+}
+
+/* Água Fluida Contínua (Ondas unificadas e sem lag) */
+.water-tile {
+    background: linear-gradient(135deg, #2980b9, #3498db, #54a0ff, #1f618d) !important;
+    background-size: 800px 800px !important;
+    animation: continuousOceanWaves 6s ease infinite alternate;
+    border: none !important;
+}
+
+@keyframes continuousOceanWaves {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+/* Grama Texturizada (Com os tufos de pixels detalhados) */
+.grass-tile {
+    background-color: #4b7c3e !important;
+    background-image: 
+        radial-gradient(circle, #5ca34d 20%, transparent 20%),
+        radial-gradient(circle, #3e6832 20%, transparent 20%) !important;
+    background-size: 8px 8px !important;
+    background-position: 0 0, 4px 4px !important;
+}
+
+/* Terra com Visual de Penhasco */
+.earth-tile {
+    background: linear-gradient(135deg, #a06b4e, #7a503a) !important;
+}
+
+/* Pedra */
+.stone-tile {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+}
+
+/* Bordas e Contornos Estilizados */
+.stone-border-t { border-top: 3px solid #2c3e50 !important; }
+.stone-border-b { border-bottom: 3px solid #2c3e50 !important; }
+.stone-border-l { border-left: 3px solid #2c3e50 !important; }
+.stone-border-r { border-right: 3px solid #2c3e50 !important; }
+
+.earth-border-t { border-top: 3px solid #5d4037 !important; }
+.earth-border-b { border-bottom: 3px solid #5d4037 !important; }
+.earth-border-l { border-left: 3px solid #5d4037 !important; }
+.earth-border-r { border-right: 3px solid #5d4037 !important; }
+
+/* Pré-visualização de Seleção */
+.selection-preview {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border: 1px dashed #ffffff !important;
+}
